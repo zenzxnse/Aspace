@@ -1,0 +1,17 @@
+// .vscode/launch.json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug game.exe",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/game.exe",   
+      "cwd": "${workspaceFolder}",
+      "miDebuggerPath": "C:/raylib/w64devkit/bin/gdb.exe",
+      "stopAtEntry": false,
+      "externalConsole": false,
+      "preLaunchTask": "CMake: build"                   
+    }
+  ]
+}

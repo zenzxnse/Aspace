@@ -1,0 +1,26 @@
+// .vscode/tasks.json
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "CMake: configure",
+        "type": "shell",
+        "command": "cmake",
+        "args": [
+          "-G", "Ninja",
+          "-B", "build",
+          "-DCMAKE_BUILD_TYPE=Debug"
+        ]
+      },
+      {
+        "label": "CMake: build",
+        "type": "shell",
+        "command": "cmake",
+        "args": [ "--build", "build" ],
+        "dependsOn": [ "CMake: configure" ],
+        "group": { "kind": "build", "isDefault": true },
+        "problemMatcher": [ "$gcc" ]
+      }
+    ]
+  }
+  
