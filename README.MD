@@ -1,5 +1,3 @@
-
-````markdown
 # 🚀 Space‑Something (working title)
 
 Arcade‑style top‑down space shooter written in **C++17** and **raylib 5**.  
@@ -38,7 +36,7 @@ Runs on Windows, Linux and macOS.
 ```bash
 git clone --recursive https://github.com/your‑nick/space‑something.git
 cd space‑something
-````
+```
 
 *Using `--recursive` is only needed if you keep raylib as a git‑submodule.
 With FetchContent (default), a plain `git clone` is enough.*
