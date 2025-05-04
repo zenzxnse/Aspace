@@ -13,17 +13,17 @@ public:
     Entity& operator=(Entity&&)  = default;
 
     // ---------- Core behaviour (default implementations) -------------------
-    virtual void update(float dt, const Camera2D&) {}
+    virtual void update([[maybe_unused]] float dt, const Camera2D&) {}
     virtual void draw(const Camera2D&) const {}
 
     // ---------- Gameplay API ------------------------------------------------
-    virtual void takeDamage(double amount) {}
-    virtual void heal(double amount) {}
-    virtual void attack(Entity& target) {}
+    virtual void takeDamage([[maybe_unused]] double amount) {}
+    virtual void heal([[maybe_unused]] double amount) {}
+    virtual void attack([[maybe_unused]] Entity& target) {}
 
     // ---------- Progression -------------------------------------------------
     virtual void levelUp() {}
-    virtual void gainExperience(int amount) {}
+    virtual void gainExperience([[maybe_unused]] int amount) {}
 
     // ---------- State setters ----------------------------------------------
     virtual void setTexture(const std::string& path); // *implemented below*

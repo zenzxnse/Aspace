@@ -71,7 +71,7 @@ public:
             int step = (m_reverse ? -1 : 1);
             m_idx += step;
 
-            if (m_idx >= m_frames.size() || m_idx < 0)
+            if (m_idx >= static_cast<int>(m_frames.size()) || m_idx < 0)
                 HandleLoopBoundary();
         }
     }
@@ -124,7 +124,7 @@ public:
         m_elapsed  = 0.0f;
         m_reverse  = false;
         m_finished = false;
-        if (!forceToStart && m_idx >= m_frames.size()) m_idx = 0;
+        if (!forceToStart && m_idx >= static_cast<int>(m_frames.size())) m_idx = 0;
     }
     void  SetLoopMode(LoopMode mode)        { m_mode = mode; }
     void  SetPlaybackSpeed(float speed)     { m_playbackSpeed = speed; }

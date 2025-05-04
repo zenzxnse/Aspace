@@ -7,7 +7,7 @@
 
 int main()
 {
-    InitWindow(2000, 1200, "World + PlayerController demo");
+    InitWindow(2000, 1200, "Hello World!");
     SetTargetFPS(60);
 
     /* 1.  World ------------------------------------------------------ */
