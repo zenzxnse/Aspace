@@ -6,7 +6,7 @@
       "name": "Debug game.exe",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/game.exe",   
+      "program": "${workspaceFolder}/build/bin/game.exe",   
       "cwd": "${workspaceFolder}",
       "miDebuggerPath": "C:/raylib/w64devkit/bin/gdb.exe",
       "stopAtEntry": false,
