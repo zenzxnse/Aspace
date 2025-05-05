@@ -21,33 +21,42 @@ class PlayerController : public CameraTarget
 public:
     template<typename... Args>
     explicit PlayerController(Args&&... shipCtor)
-    {
-        ship = std::make_unique<TShip>(std::forward<Args>(shipCtor)...);
-    }
+        : ship(std::make_unique<TShip>(std::forward<Args>(shipCtor)...))
+    {}
 
-    TShip& getShip()            { return *ship; }
-    const TShip& getShip() const{ return *ship; }
+    TShip&       getShip()       { return *ship; }
+    const TShip& getShip() const { return *ship; }
+
+    // ───── forward the setters you actually care about ──────────────
+    void setSpeed(double s) override             { ship->setSpeed(s); }
+    void setHealth(double h) override            { ship->setHealth(h); }
+    void takeDamage(double d) override           { ship->takeDamage(d); }
+    void heal(double h) override                 { ship->heal(h); }
+    // …and any other virtual setters you want to expose…
 
     /* forward helpers ------------------------------------------------ */
     void setTarget(Vector2 p)               { ship->setTarget(p); }
     template<typename... Args>
-    void addPart  (Args&&...a)              { ship->addPart(std::forward<decltype(a)>(a)...); }
+    void addPart(Args&&... a)               { ship->addPart(std::forward<Args>(a)...); }
 
-    /* per‑frame ------------------------------------------------------- */
-    void update(float dt,const Camera2D& cam) override
+    /* per-frame ------------------------------------------------------- */
+    void update(float dt, const Camera2D& cam) override
     {
-        /* target = mouse world space */
+        // e.g. drag mouse → ship
         Vector2 wm = GetScreenToWorld2D(GetMousePosition(), cam);
         ship->setTarget(wm);
 
         ship->update(dt, cam);
 
-        /* keep controller's pos in sync so camera can still follow us */
+        // sync our “camera target” position
         position = ship->getPosition();
         recalcCollision();
     }
 
-    void draw(const Camera2D& cam) const override { ship->draw(cam); }
+    void draw(const Camera2D& cam) const override
+    {
+        ship->draw(cam);
+    }
 
 private:
     std::unique_ptr<TShip> ship;

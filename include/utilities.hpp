@@ -36,6 +36,24 @@ inline Texture2D LoadTextureNN(const std::string& path,
     return tex;                          // caller: UnloadTexture(tex)
 }
 
+inline Texture2D LoadTextureNNRotate270(const std::string& path,
+                              int   scale        = 1,
+                              bool  pointFilter  = true)
+{
+    Image img = LoadImage(path.c_str());
+    if (scale > 1)
+        ImageResizeNN(&img, img.width * scale, img.height * scale);
+
+    ImageRotateCCW(&img);                
+    Texture2D tex = LoadTextureFromImage(img);
+    UnloadImage(img);
+
+    if (pointFilter)
+        SetTextureFilter(tex, TEXTURE_FILTER_POINT);
+
+    return tex;                          // caller: UnloadTexture(tex)
+}
+
 // ----------------------------------------------------------------
 // Slice a horizontal strip spritesheet into equal‑width Rectangles.
 // ----------------------------------------------------------------

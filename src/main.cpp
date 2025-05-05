@@ -2,8 +2,9 @@
 #include <raylib.h>
 #include "utilities.hpp"           // LoadTextureNN, MakeStripAnimation …
 #include "world.hpp"
-#include "basicship.hpp"           // renamed “old Player” → BasicShip
+#include "basicship.hpp"         // renamed “old Player” → BasicShip
 #include "playercontroller.hpp"    // template wrapper
+#include "bigship.hpp"
 
 int main()
 {
@@ -25,6 +26,8 @@ int main()
         "rsc/Main Ship/Main Ship - Engine Effects/PNGs/"
         "Main Ship - Engines - Base Engine - Powering.png",
         3);
+
+    Texture2D dreadNaught = util::LoadTextureNNRotate270("rsc/BLB63dreadnaught.png");
 
     Texture2D baseEngine = util::LoadTextureNN("rsc/Main Ship/Main Ship - Engines/PNGs/Main Ship - Engines - Base Engine.png", 3);
 
@@ -48,7 +51,7 @@ int main()
         Vector2{500, 300},          // ← world position
         hullTex                    // BasicShip(Texture2D&,Vector2)
         );
-
+    player.setSpeed(500);         // set speed of the ship
     // bolt thruster onto the internal ship
     player.getShip().addPart(&flamesTex, flamesIdle,
                              Vector2{0, 0}, -1);
@@ -57,6 +60,13 @@ int main()
 
     player.getShip().addPart(&baseEngine, baseEngineAnim,
                              Vector2{0, 0}, -1);
+
+
+    for (int i=0;i<10;++i)
+    {
+        Vector2 p{ GetRandomValue(200, 9800), GetRandomValue(200, 14800) };
+        world.spawn<BigShip>(p, dreadNaught);
+    }
 
     /* 5.  Main loop -------------------------------------------------- */
     while (!WindowShouldClose())
@@ -80,6 +90,9 @@ int main()
     /* 6.  Cleanup ---------------------------------------------------- */
     UnloadTexture(hullTex);
     UnloadTexture(flamesTex);
+    UnloadTexture(poweringTex);
+    UnloadTexture(dreadNaught);
+    UnloadTexture(baseEngine);
     CloseWindow();
     return 0;
 }
