@@ -1,3 +1,5 @@
 archived/
 build/ 
 .git/
+_deps/
+.vscode/
