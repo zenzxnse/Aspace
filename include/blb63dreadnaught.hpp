@@ -7,7 +7,7 @@
 #include <cmath>
 #include <raymath.h>
 
-class BigShip : public Entity
+class BLB63DreadNaught : public Entity
 {
 public:
     // ------------------------------------------------------------ constants
@@ -19,7 +19,7 @@ public:
 
     // ------------------------------------------------------------ CTORS
     // uses an ALREADY‑LOADED texture (keep ownership)
-    BigShip(Texture2D& hull, Vector2 start)
+    BLB63DreadNaught(Texture2D& hull, Vector2 start)
         : _rng(std::random_device{}()), _timeToNewGoal(0.f)
     {
         texture   = hull;           /* we do NOT own it               */
@@ -67,7 +67,7 @@ public:
 
     }
 
-    explicit BigShip(const std::string& path, Vector2 start = {0,0})
+    explicit BLB63DreadNaught(const std::string& path, Vector2 start = {0,0})
         : _rng(std::random_device{}()), _timeToNewGoal(0.f), ownsTexture(true)
     {
         Image img = LoadImage(path.c_str());
@@ -195,7 +195,7 @@ public:
         for(auto* p:sorted) if(p->z>=0) p->draw(pivotWorld,rotation);
     }
 
-    ~BigShip() override
+    ~BLB63DreadNaught() override
     {
         if (ownsTexture) UnloadTexture(texture);
         else texture.id = 0;

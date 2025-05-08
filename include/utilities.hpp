@@ -20,11 +20,11 @@ namespace util {
 //   apply point filtering so pixel art stays crisp.
 // ----------------------------------------------------------------
 inline Texture2D LoadTextureNN(const std::string& path,
-                              int   scale        = 1,
+                              float   scale        = 1,
                               bool  pointFilter  = true)
 {
     Image img = LoadImage(path.c_str());
-    if (scale > 1)
+    if (scale > 0.0f)
         ImageResizeNN(&img, img.width * scale, img.height * scale);
 
     Texture2D tex = LoadTextureFromImage(img);

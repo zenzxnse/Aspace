@@ -19,12 +19,12 @@ Right now the game features a Separating Axis Theorem (SAT) based collision dete
 
 ## Features
 
-* Pixel‑art ship with modular sprite‑parts (thrusters, weapons, …)
-* Player‑controller wrapper that can swap to bigger ships later
-* Camera that follows any `CameraTarget` entity
-* Component‑based world grid for lightweight collision / culling
-* Pure CMake build – no Makefile hacks – ships with raylib sources
-* **NEW** SAT-based collision detection system for accurate hitboxes
+- Pixel‑art ship with modular sprite‑parts (thrusters, weapons, …)
+- Player‑controller wrapper that can swap to bigger ships later
+- Camera that follows any `CameraTarget` entity
+- Component‑based world grid for lightweight collision / culling
+- Pure CMake build – no Makefile hacks – ships with raylib sources
+- **NEW** SAT-based collision detection system for accurate hitboxes
 
 ---
 

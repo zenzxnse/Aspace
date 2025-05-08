@@ -36,7 +36,7 @@
 #include "world.hpp"
 #include "basicship.hpp"
 #include "playercontroller.hpp"
-#include "bigship.hpp"
+#include "blb63dreadnaught.hpp"
 
 
 /* Runs from the last tests performed on collision*/
@@ -59,7 +59,7 @@ int main()
         "Main Ship - Engines - Base Engine - Powering.png",
         3);
 
-    Texture2D DarthDreadBigB = util::LoadTextureNN("rsc/DarthBigB.png");
+    Texture2D DarthDreadBigB = util::LoadTextureNN("rsc/DarthBigB.png", 0.5f);
 
     Texture2D dreadNaught = util::LoadTextureNN("rsc/BLB63dreadnaught.png");
 
@@ -85,10 +85,8 @@ int main()
     
     world.setCameraTarget(&player);
 
-    for (int i = 0; i < 10; ++i) {
-        Vector2 position{ 500, 300 };
-        world.spawn<BigShip>(position, dreadNaught);
-    }
+    world.spawn<BLB63DreadNaught>({ 800, 600 }, DarthDreadBigB);
+    world.spawn<BLB63DreadNaught>({ 1000, 800 }, dreadNaught);
 
     while (!WindowShouldClose())
     {
