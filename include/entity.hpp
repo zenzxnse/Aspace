@@ -1,8 +1,12 @@
 #pragma once
 #include <raylib.h>
 #include <string>
+#include "collisionshapes.hpp"
 
-// Abstract base class (interface) for every entity --------------------------
+/*
+ Abstract base class (interface) for every entity --------------------------
+ [All entities are derived from this class.]
+*/
 class Entity {
 public:
     // ---------- Life-cycle --------------------------------------------------
@@ -20,6 +24,10 @@ public:
     virtual void takeDamage([[maybe_unused]] double amount) {}
     virtual void heal([[maybe_unused]] double amount) {}
     virtual void attack([[maybe_unused]] Entity& target) {}
+    virtual void onCollision([[maybe_unused]] Entity& other) {}
+    virtual bool isAliveAndCollidable() { return isAlive && isCollidable; } // changed return type to bool
+    virtual void recalcOverallAABB(); // update AABB if needed
+    inline Rectangle getOverallAABB() const { return overallAABB; } // AABB for this entity
 
     // ---------- Progression -------------------------------------------------
     virtual void levelUp() {}
@@ -27,11 +35,12 @@ public:
 
     // ---------- State setters ----------------------------------------------
     virtual void setTexture(const std::string& path); // *implemented below*
-    virtual void setPosition(Vector2 pos)         { position = pos;  recalcCollision(); }
-    virtual void setSize(Vector2 s)               { size = s;        recalcCollision(); }
+    virtual void setPosition(Vector2 pos)         { position = pos;  recalcOverallAABB(); }
+    virtual void setSize(Vector2 s)               { size = s;        recalcOverallAABB(); }
     virtual void setHealth(double h)              { health = h; }
     virtual void setSpeed(double s)               { speed = s; }
     virtual void setRotation(float r)         { rotation = r; }
+    virtual void setScale(float s)               { scale = s; recalcOverallAABB(); }
     // ... (other trivial setters can stay inline)
 
     // ---------- Query helpers (non-virtual) --------------------------------
@@ -40,7 +49,6 @@ public:
     Vector2&   getMutablePosition() { return position; } // mutable access
     bool             alive()          const { return isAlive; }
 
-protected:
     Entity() = default;
 
     // Keep heavy data protected so derived classes can poke it ---------------
@@ -58,17 +66,22 @@ protected:
     float rotation       = 0.0f;
 
     bool   isAlive       = true;
+    bool   isColliding   = false; 
+    bool   isCollidable   = true;  
     int    level         = 1;
     int    xp            = 0;
+    float scale          = 1.0f; // scale factor for the entity
     Color  tint          = WHITE;
 
     Vector2   velocity{0,0};
+    Rectangle  overallAABB{}; // AABB for this entity
     Rectangle collisionBox{};
     double    defense         = 0.0;
     double    mana            = 0.0, manaRegen = 0.0;
     double    stamina         = 0.0, stamRegen = 0.0;
     bool      invincible      = false;
     double    invincTimer     = 0.0;
+    CollisionShape shape;
 
     void recalcCollision() {      // keep AABB in sync
         collisionBox = { position.x - size.x*0.5f,
@@ -81,16 +94,3 @@ protected:
         return Vector2{ a.x + (b.x - a.x)*t, a.y + (b.y - a.y)*t };
     }
 };
-
-// Inline implementation kept in the header for brevity
-inline void Entity::setTexture(const std::string& path)
-{
-    if (texture.id) UnloadTexture(texture);
-
-    Image img = LoadImage(path.c_str());
-    ImageResize(&img, (int)size.x, (int)size.y);
-    texture   = LoadTextureFromImage(img);
-    UnloadImage(img);
-
-    offset = { size.x*0.5f, size.y*0.5f };
-}

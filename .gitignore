@@ -1,5 +1,8 @@
 archived/
-build/ 
+build/
+build-debug/
+build-release/ 
 .git/
 _deps/
 .vscode/
+README.pdf

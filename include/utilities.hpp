@@ -36,15 +36,51 @@ inline Texture2D LoadTextureNN(const std::string& path,
     return tex;                          // caller: UnloadTexture(tex)
 }
 
+
+inline Texture2D LoadTextureNNBySize(const std::string& path,
+                              int   targetWidth,
+                              int   targetHeight,
+                              bool  pointFilter  = true)
+{
+    Image img = LoadImage(path.c_str());
+    ImageResizeNN(&img, targetWidth, targetHeight);
+
+    Texture2D tex = LoadTextureFromImage(img);
+    UnloadImage(img);
+
+    if (pointFilter)
+        SetTextureFilter(tex, TEXTURE_FILTER_POINT);
+
+    return tex;                          
+}
+
 inline Texture2D LoadTextureNNRotate270(const std::string& path,
                               int   scale        = 1,
                               bool  pointFilter  = true)
 {
     Image img = LoadImage(path.c_str());
-    if (scale > 1)
+    if (scale != 0)
         ImageResizeNN(&img, img.width * scale, img.height * scale);
 
     ImageRotateCCW(&img);                
+    Texture2D tex = LoadTextureFromImage(img);
+    UnloadImage(img);
+
+    if (pointFilter)
+        SetTextureFilter(tex, TEXTURE_FILTER_POINT);
+
+    return tex;                          // caller: UnloadTexture(tex)
+}
+
+inline Texture2D LoadTextureNNRotate90(const std::string& path,
+                              int   scale        = 1,
+                              bool  pointFilter  = true)
+{
+    Image img = LoadImage(path.c_str());
+    if (scale != 0)
+        ImageResizeNN(&img, img.width * scale, img.height * scale);
+
+    ImageRotateCW(&img);                
     Texture2D tex = LoadTextureFromImage(img);
     UnloadImage(img);
 
@@ -82,7 +118,7 @@ inline Animation MakeStripAnimation(const std::string&  name,
     Animation anim(name, mode, playbackSpeed);
     for (auto& rect : SliceStrip(tex, frames))
         anim.AddFrame(rect, frameDuration);
-    anim.setFramesOffsetToCenter();      // assume we want centred origin
+    anim.setFramesOffsetToCenter();      // if center origin could wrap this in a if else later
     return anim;                         // RVO → cheap copy
 }
 

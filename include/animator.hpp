@@ -24,7 +24,34 @@ Vector2 Frame::GetCenter() const
 }
 
 /* ───────────────────────── Animation ───────────────────────────── */
-
+/**
+ * @class Animation
+ * @brief Manages a sequence of frames for 2D sprite animation with support for different loop modes.
+ *
+ * The Animation class allows you to define and control frame-based animations for sprites.
+ * It supports different loop modes (Loop, Once, PingPong), playback speed adjustment, and frame offsets.
+ * You can add frames with specific source rectangles, durations, and offsets, and control how the animation
+ * progresses and is rendered.
+ *
+ * Usage:
+ * - Add frames using AddFrame().
+ * - Update the animation state with Update().
+ * - Draw the current frame using one of the Draw() methods.
+ * - Control playback with Reset(), SetLoopMode(), and SetPlaybackSpeed().
+ *
+ * Features:
+ * - Supports looping, single-play, and ping-pong playback.
+ * - Allows negative playback speed for reverse animation.
+ * - Provides methods to center or align frame offsets.
+ *
+ * Example:
+ * @code
+ * Animation walk("Walk", Animation::LoopMode::Loop);
+ * walk.AddFrame({0,0,32,32}, 0.1f).AddFrame({32,0,32,32}, 0.1f);
+ * walk.Update(deltaTime);
+ * walk.Draw(texture, position);
+ * @endcode
+ */
 class Animation
 {
 public:

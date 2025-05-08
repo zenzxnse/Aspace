@@ -1,20 +1,52 @@
-/*────────────────── main.cpp (using PlayerController) ─────────────────*/
+/***********************************************************************************
+ *                                      [MAIN]
+ * @brief Entry point of the game.
+ * @details Most of the .hpp files contain their implementations directly, instead of separate .cpp files.
+ * @details This approach is used to simplify development and debugging, avoiding the need to switch between .cpp and .hpp files.
+ * @details This game features advanced collision detection using the Separating Axis Theorem (SAT).
+ * @details Implemented with Raylib, enabling precise collision detection.
+ * @details Several animation utilities are also implemented to simplify sprite animation.
+ *
+ * MIT License
+ *
+ * Copyright (c) 2025 Zenzxnse
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ ************************************************************************************/
+
+
+
 #include <raylib.h>
-#include "utilities.hpp"           // LoadTextureNN, MakeStripAnimation …
 #include "world.hpp"
-#include "basicship.hpp"         // renamed “old Player” → BasicShip
-#include "playercontroller.hpp"    // template wrapper
+#include "basicship.hpp"
+#include "playercontroller.hpp"
 #include "bigship.hpp"
 
+
+/* Runs from the last tests performed on collision*/
 int main()
 {
-    InitWindow(1200, 720, "Hello World!");
+    InitWindow(2000, 1500, "Hello World!");
     SetTargetFPS(60);
 
-    /* 1.  World ------------------------------------------------------ */
-    World world;
+    World world("rsc/Environment/white_local_star_2.png");
 
-    /* 2.  Shared textures ------------------------------------------- */
     Texture2D hullTex   = util::LoadTextureNN(
         "rsc/Main Ship/Main Ship - Bases/PNGs/Main Ship - Base - Full health.png",
         3);
@@ -27,11 +59,12 @@ int main()
         "Main Ship - Engines - Base Engine - Powering.png",
         3);
 
-    Texture2D dreadNaught = util::LoadTextureNNRotate270("rsc/BLB63dreadnaught.png");
+    Texture2D DarthDreadBigB = util::LoadTextureNN("rsc/DarthBigB.png");
+
+    Texture2D dreadNaught = util::LoadTextureNN("rsc/BLB63dreadnaught.png");
 
     Texture2D baseEngine = util::LoadTextureNN("rsc/Main Ship/Main Ship - Engines/PNGs/Main Ship - Engines - Base Engine.png", 3);
 
-    /* 3.  Make a ship animation bank -------------------------------- */
     Animation flamesIdle = util::MakeStripAnimation(
         "idle", flamesTex, 3, 0.1f);
 
@@ -41,53 +74,37 @@ int main()
     Animation baseEngineAnim = util::MakeStripAnimation(
         "baseEngine", baseEngine, 1, 0.1f, Animation::LoopMode::Once);
 
+    auto& player = world.spawn<BasicShip>({ 500, 300 }, hullTex);
+    player.addPart(&flamesTex, flamesIdle,
+        Vector2{0, 0}, -1);
+    player.addPart(&poweringTex, flamesPowering,
+            Vector2{0, 0}, -1);
 
-    /* 4.  Spawn the player controller + ship ------------------------ */
-    using MyPlayer = PlayerController<BasicShip>;
+    player.addPart(&baseEngine, baseEngineAnim,
+            Vector2{0, 0}, -1);
+    
+    world.setCameraTarget(&player);
 
-    //  - first arg: spawn position (World::spawn appends it)
-    //  - following args are forwarded to BasicShip ctor
-    auto& player = world.spawn<MyPlayer>(
-        Vector2{500, 300},          // ← world position
-        hullTex                    // BasicShip(Texture2D&,Vector2)
-        );
-    player.setSpeed(500);         // set speed of the ship
-    // bolt thruster onto the internal ship
-    player.getShip().addPart(&flamesTex, flamesIdle,
-                             Vector2{0, 0}, -1);
-    player.getShip().addPart(&poweringTex, flamesPowering,
-                             Vector2{0, 0}, -1);
-
-    player.getShip().addPart(&baseEngine, baseEngineAnim,
-                             Vector2{0, 0}, -1);
-
-
-    for (int i=0;i<10;++i)
-    {
-        Vector2 p{ GetRandomValue(200, 9800), GetRandomValue(200, 14800) };
-        world.spawn<BigShip>(p, dreadNaught);
+    for (int i = 0; i < 10; ++i) {
+        Vector2 position{ 500, 300 };
+        world.spawn<BigShip>(position, dreadNaught);
     }
 
-    /* 5.  Main loop -------------------------------------------------- */
     while (!WindowShouldClose())
     {
         float dt = GetFrameTime();
 
-        /* 5a.  Give controller the current mouse target */
         Vector2 worldMouse =
             util::ScreenToWorld(GetMousePosition(), world.getCamera());
         player.setTarget(worldMouse);
 
-        /* 5b.  Update everything */
         world.update(dt);
 
-        /* 5c.  Draw frame */
         BeginDrawing();
             world.draw();
         EndDrawing();
     }
 
-    /* 6.  Cleanup ---------------------------------------------------- */
     UnloadTexture(hullTex);
     UnloadTexture(flamesTex);
     UnloadTexture(poweringTex);

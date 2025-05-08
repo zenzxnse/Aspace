@@ -5,9 +5,9 @@
       "name": "Debug Aspace.exe",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/bin/Aspace.exe",
+      "program": "${workspaceFolder}/build-debug/bin/Aspace.exe",
       "cwd": "${workspaceFolder}",
-      "miDebuggerPath": "C:/raylib/w64devkit/bin/gdb.exe",
+      "miDebuggerPath": "gdb.exe", 
       "stopAtEntry": false,
       "externalConsole": false,
       "preLaunchTask": "CMake: build"

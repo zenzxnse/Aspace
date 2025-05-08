@@ -1,10 +1,14 @@
 /* ───────────────────────────  World.hpp  ──────────────────────────── */
 #pragma once
 #include <raylib.h>
+#include <raymath.h>
 #include <memory>
 #include <vector>
+#include "utilities.hpp"
 #include <algorithm>        
 #include <type_traits>
+#include <cassert>
+#include "collisionshapes.hpp"
 
 #include <entity.hpp>
 #include <playercontroller.hpp>
@@ -47,18 +51,24 @@ private:
 class World {
 public:
     /* public constants -------------------------------------------------- */
-    static constexpr int WORLD_W   = 10'000;
-    static constexpr int WORLD_H   = 15'000;
+    static constexpr int WORLD_W   = 8192 * 2;
+    static constexpr int WORLD_H   = 4096 * 2;
     static constexpr int CELL_SIZE = 512;
 
     /* ctor -------------------------------------------------------------- */
-    World()
+
+    void setCameraTarget(Entity* e) {
+        cameraFollow = e;
+    }
+
+    World(const char* bgTexPath = nullptr)
     : grid(WORLD_W, WORLD_H, CELL_SIZE)
     {
         camera.offset   = { GetScreenWidth()*0.5f, GetScreenHeight()*0.5f };
         camera.rotation = 0.0f;
         camera.zoom     = 1.0f;
         camera.target   = { WORLD_W*0.5f, WORLD_H*0.5f };
+        backgroundTex = util::LoadTextureNN(bgTexPath ? bgTexPath : "../rsc/Environment/white_local_star_2.png", 2);
     }
 
     /* generic spawner --------------------------------------------------- */
@@ -73,7 +83,7 @@ public:
 
         grid.insert(&ref, ref.getCollision());
 
-        if constexpr (std::is_base_of_v<CameraTarget, T>) cameraFollow = static_cast<CameraTarget*>(&ref);
+        // if constexpr (std::is_base_of_v<CameraTarget, T>) cameraFollow = static_cast<CameraTarget*>(&ref);
         return static_cast<T&>(ref);
     }
     void keepInside(Rectangle& box, Vector2& pos)
@@ -91,24 +101,66 @@ public:
     /* per-frame --------------------------------------------------------- */
     void update(float dt)
     {
-        for (auto& e : entities)
+        // First pass: let each entity run its own logic & keep it in its cell
+        for (auto& ePtr : entities)
+        {
+            Entity& E = *ePtr;
+            if (!E.isAliveAndCollidable()) continue;
+    
+            // Remember old cell & bbox
+            Cell      oldCell = bucketOf(E.getPosition());
+            Rectangle oldBox  = E.getOverallAABB();
+    
+            // Actually update the entity (movement, AI, shape.updateWorldVertices, etc.)
+            E.update(dt, camera);
+    
+            // Keep it inside the world bounds (if you like)
+            keepInside(oldBox, E.getMutablePosition());
+    
+            // If it moved to a new cell, update the grid
+            Cell newCell = bucketOf(E.getPosition());
+            if (oldCell != newCell) {
+                grid.remove(&E, oldBox);
+                grid.insert(&E, E.getOverallAABB());
+            }
+
+            zoomControl(); // Handle zoom control here
+        }
+    
+        // Second pass: broad‐phase via grid + narrow‐phase SAT collisions
+        for (auto& ePtr : entities)
+        {
+            Entity& A = *ePtr;
+            if (!A.isAliveAndCollidable()) continue;
+
+            // grab A’s rough AABB and collect all possible B’s
+            Rectangle aabbA = A.getOverallAABB();
+            std::vector<Entity*> candidates;
+            grid.query(aabbA, [&](Entity& e){ candidates.push_back(&e); });
+
+            // Now do your narrow‐phase on that snapshot
+            for (Entity* B : candidates)
             {
-                Cell      oldCell = bucketOf(e->getPosition());
-                Rectangle oldBox  = e->getCollision();
+                if (B == &A) continue;
+                if (!B->isAliveAndCollidable()) continue;
+                // only do each pair once
+                if (&A > B) continue;
 
-                e->update(dt, camera);                      // entity logic
+                Vector2 mtv;
+                if (CollisionSystem::CheckShapesCollide(A.shape, B->shape, mtv))
+                {
+                    // resolve collision by moving both out by half the MTV
+                    Vector2 half = Vector2Scale(mtv, 0.5f);
+                    A.setPosition(Vector2Subtract(A.getPosition(), half));
+                    B->setPosition(Vector2Add   (B->getPosition(), half));
 
-                // NEW: keep the rectangle inside world bounds
-                keepInside(oldBox, e->getMutablePosition());
-                //   ^ you can expose a non-const accessor or add a wrapper in Entity:
-                //     Vector2& getMutablePosition() { return position; }
-
-                Cell newCell = bucketOf(e->getPosition());
-                if (oldCell != newCell) {
-                    grid.remove(e.get(), oldBox);
-                    grid.insert(e.get(), e->getCollision());
+                    // now update the grid entries *after* you’re done querying
+                    grid.remove(&A, aabbA);
+                    grid.insert(&A, A.getOverallAABB());
                 }
             }
+        }
+    
         if (cameraFollow) camera.target = cameraFollow->getPosition();
         clampCamera();
     }
@@ -121,6 +173,16 @@ public:
             Rectangle view = expandedView(64);   // small margin
             grid.query(view, [&](Entity& e){ e.draw(camera); });
         EndMode2D();
+    }
+
+    void zoomControl()
+    {
+        float wheel = GetMouseWheelMove();
+        if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL))
+        {
+            if (wheel > 0) targetZoom = std::min(targetZoom + 0.2f, 3.0f);
+            else if (wheel < 0) targetZoom = std::max(targetZoom - 0.2f, 0.5f);
+        }
     }
 
     /* teleport-safe ----------------------------------------------------- */
@@ -159,15 +221,18 @@ private:
     /* background -------------------------------------------------------- */
     void drawBackground() const
     {
-        ClearBackground(BLACK);
-        for (int x=0; x<=WORLD_W; x+=32) DrawLine(x, 0, x, WORLD_H, Fade(LIGHTGRAY,0.3f));
-        for (int y=0; y<=WORLD_H; y+=32) DrawLine(0, y, WORLD_W, y, Fade(LIGHTGRAY,0.3f));
+        Rectangle src { 0, 0, (float)backgroundTex.width,  (float)backgroundTex.height };
+        Rectangle dst { 0, 0, (float)backgroundTex.width,  (float)backgroundTex.height };
+        DrawTexturePro(backgroundTex, src, dst, {0,0}, 0.0f, WHITE);
     }
 
     /* data -------------------------------------------------------------- */
     UniformGrid                                       grid;
     std::vector<std::unique_ptr<Entity>>              entities;
     Camera2D                                          camera;
-    CameraTarget* cameraFollow = nullptr;
+    Entity* cameraFollow = nullptr;
+    Texture2D                                         backgroundTex{};  
+    float   targetZoom     = 1.0f;      // where we want to go
+    float   zoomSmoothSpeed = 8.0f;     // the larger, the snappier
 };
 /* ───────────────────────────────────────────────────────────────────── */

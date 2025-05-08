@@ -5,7 +5,7 @@
 #include <vector>
 #include <cmath>
 
-/*  A direct rename of your old Player class.
+/*  A direct rename of the Player class.
  *  Nothing in its behaviour changed — idle movement, parts, drawing. */
 class BasicShip : public Entity
 {
@@ -14,20 +14,34 @@ public:
     BasicShip(Texture2D& sharedTex, Vector2 pos)
         : extTexture(&sharedTex)
     {
-        texture = sharedTex;            // shallow copy
-        size    = { (float)texture.width, (float)texture.height };
-        position= pos;
-        offset  = { size.x*0.5f, size.y*0.5f };
-        recalcCollision();
+        texture   = sharedTex;
+        size      = {(float)texture.width, (float)texture.height};
+        position  = pos;
+        offset    = {size.x*0.5f, size.y*0.5f};
+        speed     = 100.f;
+
+        // ─── give the shape a simple equilateral triangle around the pivot ───
+        float h = size.y*0.25f;
+        float w = size.x*0.25f;
+        // local coords relative to the ship's centre:
+        shape.addPolygon({
+            {  0.0f, -h },     // top
+            {  w,    h  },     // bottom right
+            { -w,    h  }      // bottom left
+        });
+
+        // prep the AABB, etc.
+        shape.updateWorldVertices(position, rotation, /*scale=*/1.0f);
+        recalcOverallAABB();
+
     }
 
-    /*  ▸ self‑loading ctor (optional) */
+    /*  self‑loading ctor (optional) */
     explicit BasicShip(const std::string& path, Vector2 pos = {0,0})
     {
         setTexture(path);
         position = pos;
         ownsTexture = true;
-        recalcCollision();
     }
 
     /* -------- sprites / parts ------------------------------------ */
@@ -68,7 +82,8 @@ public:
         parts[1].active = boosting;
 
         for (auto& p: parts) p.update(dt);
-        recalcCollision();
+        shape.updateWorldVertices(position, rotation);
+        recalcOverallAABB();
     }
 
     void draw(const Camera2D&) const override
@@ -84,6 +99,8 @@ public:
 
         Rectangle src{0,0,size.x,size.y};
         Rectangle dst{position.x,position.y,size.x,size.y};
+        DrawRectangleLinesEx(getOverallAABB(), 2.0f, BLUE);
+        shape.drawLines(RED);
         DrawTexturePro(texture,src,dst,offset,rotation,WHITE);
 
         for (auto* p:sorted) if (p->z>=0) p->draw(pivotWorld,rotation);

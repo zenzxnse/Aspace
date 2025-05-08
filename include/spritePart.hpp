@@ -19,18 +19,18 @@ struct SpritePart
 
         if (!active) return;
 
-        /* 1. rotate local offset from ship space → world space */
+        /* rotate local offset from ship space → world space */
         const float rad = shipRotDeg * DEG2RAD;
         Vector2 off {
             local.x * std::cos(rad) - local.y * std::sin(rad),
             local.x * std::sin(rad) + local.y * std::cos(rad)
         };
 
-        /* 2. compute pivot = centre of current frame */
+        /* compute pivot = centre of current frame */
         const Frame& f = anim.Current();
         Vector2 pivot { f.src.width * 0.5f, f.src.height * 0.5f };
 
-        /* 3. draw: SAME rotation, SAME pivot ---------------------------------- */
+        /* draw: SAME rotation, SAME pivot ---------------------------------- */
         anim.Draw(*tex,
                 worldPos, off,                // entityPos + rotated local
                 shipRotDeg + relRot,          // total rotation

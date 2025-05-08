@@ -7,7 +7,7 @@
       "command": "cmake",
       "args": [
         "-G", "Ninja",
-        "-B", "build",
+        "-B", "build-debug",
         "-DCMAKE_BUILD_TYPE=Debug"
       ]
     },
@@ -15,7 +15,7 @@
       "label": "CMake: build",
       "type": "shell",
       "command": "cmake",
-      "args": [ "--build", "build" ],
+      "args": [ "--build", "build-debug" ],
       "dependsOn": [ "CMake: configure" ],
       "group": { "kind": "build", "isDefault": true },
       "problemMatcher": [ "$gcc" ]

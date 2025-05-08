@@ -2,6 +2,21 @@
 
 Aspace is a simple 2D top-down ship demo built with [Raylib](https://raylib.com/) and C++.
 
+## Introducing Collision System
+
+![Collision System Demo](rsc/rme/collisionss.png)
+
+Right now the game features a Separating Axis Theorem (SAT) based collision detection system that provides:
+
+- 70% - 80% Accurate convex polygon collision detection
+- AABB checks if AABB passes then only SAT is computed
+- Minimum translation vectors for collision resolution
+- Support for rotating hitboxes
+- High performance through spatial partitioning
+- Each entity can have its own collision shape defined as a convex polygon, allowing for precise interactions between game objects.
+- For now the collision vertices are hardcoded to their respective ship class.
+
+
 ## Features
 
 * Pixel‑art ship with modular sprite‑parts (thrusters, weapons, …)
@@ -9,6 +24,7 @@ Aspace is a simple 2D top-down ship demo built with [Raylib](https://raylib.com/
 * Camera that follows any `CameraTarget` entity
 * Component‑based world grid for lightweight collision / culling
 * Pure CMake build – no Makefile hacks – ships with raylib sources
+* **NEW** SAT-based collision detection system for accurate hitboxes
 
 ---
 
@@ -16,35 +32,44 @@ Aspace is a simple 2D top-down ship demo built with [Raylib](https://raylib.com/
 
 |               | Windows                         | Linux / macOS                    |
 |---------------|---------------------------------|----------------------------------|
-| **Compiler**  | MinGW‑w64 10+ (auto‑downloaded with VS Code C/C++) | GCC 10+ / Clang 12+ |
-| **CMake**     | ≥ 3.20                          | `sudo apt install cmake` or `brew install cmake` |
-| **Ninja**     | *(optional)* `choco install ninja`  | `sudo apt install ninja-build` or `brew install ninja` |
+| **Compiler**  | MinGW‑w64 10+ | GCC 10+ / Clang 12+ (Wasn't tested on either OS so it's not guranteed that the build will be created successfully or not)|
+| **CMake**     | ≥ 3.10...3.90                          | `sudo apt install cmake` or `brew install cmake` |
+| **Ninja**     | *(optional)* `choco install ninja` or `scoop install ninja`  | `sudo apt install ninja-build` or `brew install ninja` |
 
-> **No global raylib install is required** – the build pulls the exact tag we need.
+> **No global raylib install is required** – the build pulls the exact tag we need. (Which is 250 MB)
 
 ---
 
 ## Getting the code
 
 ```bash
-git clone --recursive https://github.com/your‑nick/space‑something.git
+git clone --recursive https://github.com/zenzxnse/Aspace.git
 cd space‑something
 ```
 
-*Using `--recursive` is only needed if you keep raylib as a git‑submodule.
+*Using `--recursive` is only needed if you keep raylib as a git‑submodule.
 With FetchContent (default), a plain `git clone` is enough.*
 
 ---
 
+## Building
+
+### Quick Build (Debug and Release)
+
 ```bash
-# Generate build files (will fetch & compile Raylib automatically)
+# Run the build script - builds both Debug and Release versions
+./build.bat
+```
+
+### Build (Debug)
+
+```bash
 cmake -G Ninja -B build -DCMAKE_BUILD_TYPE=Debug
-
-# Please wait: the first configure step downloads Raylib (~5 MB) and builds it.
-
-# Compile the game
 cmake --build build
 ```
+
+# Or Hit F5 (Make sure you have CMake Tools installed as well as GCC++)
+# For MacOs or Linux you may want to use the terminal instead of Visual Studio since the compiler path is hardcoded into tasks for windows.
 
 ### Build (Release)
 
@@ -56,11 +81,7 @@ cmake --build build
 ### Run
 
 ```bash
-# On Linux/macOS
 ./build/bin/Aspace
-
-# On Windows
-build\\bin\\Aspace.exe
 ```
 
 ## Project Layout
@@ -68,7 +89,7 @@ build\\bin\\Aspace.exe
 ```
 ├── CMakeLists.txt      # Build configuration (FetchContent for Raylib)
 ├── include/            # Public headers (Entity, World, Animator, etc.)
-├── src/                # Game source files (main.cpp, BasicShip, PlayerController)
+├── src/                # Game source files (main.cpp, BasicShip)
 ├── rsc/                # Resources (textures, spritesheets)
 └── build/              # Out‑of‑source build directory
 ```
