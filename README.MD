@@ -33,7 +33,7 @@ Right now the game features a Separating Axis Theorem (SAT) based collision dete
 |               | Windows                         | Linux / macOS                    |
 |---------------|---------------------------------|----------------------------------|
 | **Compiler**  | MinGW‑w64 10+ | This project currently downloads pre-built Raylib binaries for **Windows** (MinGW). If you want to build on other platforms, you may need to supply different Raylib binaries or build Raylib from source yourself and use the respective Operating system specific compiler. |
-| **CMake**     | [CMake](https://cmake.org/download/)    | ≥ 3.10...3.90                          | 3.10+  |
+| **CMake**     | [CMake](https://cmake.org/download/) ≥ 3.10...3.90                          | 3.10+  |
 | **Ninja**     | *(optional)* `choco install ninja` or `scoop install ninja`  | `sudo apt install ninja-build` or `brew install ninja` |
 
 > **No global raylib install is required** – the build pulls the exact tag we need. (Which is 250 MB)
