@@ -68,7 +68,7 @@ cmake -G Ninja -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ```
 
-# Or Hit F5 (Make sure you have CMake Tools installed as well as GCC++)
+# Or Hit F5 (Make sure you have CMake Tools installed as well as g++)
 # For MacOs or Linux you may want to use the terminal instead of Visual Studio since the compiler path is hardcoded into tasks for windows.
 
 ### Build (Release)
