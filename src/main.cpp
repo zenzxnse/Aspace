@@ -30,8 +30,6 @@
  * SOFTWARE.
  ************************************************************************************/
 
-
-
 #include <raylib.h>
 #include "world.hpp"
 #include "basicship.hpp"
